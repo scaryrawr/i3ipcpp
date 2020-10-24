@@ -2,6 +2,7 @@
  * This program dumps a tree of windows and workspaces to console
  */
 
+#include <algorithm>
 #include <iostream>
 
 #include <i3ipc++/ipc.hpp>
@@ -23,7 +24,50 @@ void  dump_tree_container(const i3ipc::container_t&  c, std::string&  prefix) {
 	std::cout << prefix << "layout = \"" << c.layout_raw << "\"" << std::endl;
 	std::cout << prefix << "percent = " << c.percent << std::endl;
 	if (c.workspace.has_value()) {
-		std::cout << prefix << "current_workspace = " << c.workspace.value() << std::endl;
+		std::cout << prefix << "workspace = " << c.workspace.value() << std::endl;
+	}
+	if (c.sticky.has_value()) {
+		std::cout << prefix << "sticky = " << c.sticky.value() << std::endl;
+	}
+	if (c.visible.has_value()) {
+		std::cout << prefix << "visible = " << c.visible.value() << std::endl;
+	}
+	if (c.inhibit_idle.has_value()) {
+		std::cout << prefix << "inhibit_idle = " << c.inhibit_idle.value() << std::endl;
+	}
+	if (c.fullscreen_mode.has_value()) {
+		std::cout << prefix << "fullscreen_mode = " << static_cast<int>(c.fullscreen_mode.value()) << std::endl;
+	}
+	if (c.pid.has_value()) {
+		std::cout << prefix << "pid = " << c.pid.value() << std::endl;
+	}
+	if (c.window.has_value()) {
+		std::cout << prefix << "window = " << c.window.value() << std::endl;
+	}
+	if (c.app_id.has_value()) {
+		std::cout << prefix << "app_id = " << c.app_id.value() << std::endl;
+	}
+	if (c.representation.has_value()) {
+		std::cout << prefix << "representation = " << c.representation.value() << std::endl;
+	}
+	if (c.shell.has_value()) {
+		std::cout << prefix << "shell = " << c.shell.value() << std::endl;
+	}
+	if (c.focus.has_value()) {
+		std::cout << prefix << "focus = ";
+		for (auto& focus_id : c.focus.value()) {
+			std::cout << focus_id << ", ";
+		}
+
+		std::cout << std::endl;
+	}
+	if (c.marks.has_value()) {
+		std::cout << prefix << "marks = ";
+		for (auto& mark : c.marks.value()) {
+			std::cout << mark << ", ";
+		}
+
+		std::cout << std::endl;
 	}
 	if (c.urgent) {
 		std::cout << prefix << "urgent" << std::endl;

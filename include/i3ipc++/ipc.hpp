@@ -180,17 +180,28 @@ struct window_properties_t {
 	uint64_t  transient_for; /// Logical top-level window. Nonzero value is an X11 window ID of the parent window (WM_TRANSIENT_FOR)
 };
 
+enum class FullscreenMode : int {
+	None,
+	FullWorkspace,
+	GlobalFullscreen
+};
+
+struct idle_inhibitors_t {
+	std::string application;
+	std::string user;
+};
+
 /**
  * A node of tree of windows
  */
 struct container_t {
-	uint64_t  id; ///< The internal ID (actually a C pointer value) of this container. Do not make any assumptions about it. You can use it to (re-)identify and address containers when talking to i3
-	uint64_t  xwindow_id; ///< The X11 window ID of the actual client window inside this container. This field is set to null for split containers or otherwise empty containers. This ID corresponds to what xwininfo(1) and other X11-related tools display (usually in hex)
+	uint64_t  id{}; ///< The internal ID (actually a C pointer value) of this container. Do not make any assumptions about it. You can use it to (re-)identify and address containers when talking to i3
+	uint64_t  xwindow_id{}; ///< The X11 window ID of the actual client window inside this container. This field is set to null for split containers or otherwise empty containers. This ID corresponds to what xwininfo(1) and other X11-related tools display (usually in hex)
 	std::string  name; ///< The internal name of this container. For all containers which are part of the tree structure down to the workspace contents, this is set to a nice human-readable name of the container. For containers that have an X11 window, the content is the title (_NET_WM_NAME property) of that window. For all other containers, the content is not defined (yet)
 	std::string  type; ///< Type of this container
 	BorderStyle  border; ///< A style of the container's border
 	std::string  border_raw; ///< A "border" field of TREE reply. NOT empty only if border equals BorderStyle::UNKNOWN
-	uint32_t  current_border_width; ///< Number of pixels of the border width
+	uint32_t  current_border_width{}; ///< Number of pixels of the border width
 	ContainerLayout  layout; ///< A type of the container's layout
 	std::string  layout_raw; ///< A "layout" field of TREE reply. NOT empty only if layout equals ContainerLayout::UNKNOWN
 	float  percent; ///< The percentage which this container takes in its parent. A value of < 0 means that the percent property does not make sense for this container, for example for the root container.
@@ -198,16 +209,26 @@ struct container_t {
 	rect_t  window_rect; ///< The coordinates of the actual client window inside its container. These coordinates are relative to the container and do not include the window decoration (which is actually rendered on the parent container)
 	rect_t  deco_rect; ///< The coordinates of the window decoration inside its container. These coordinates are relative to the container and do not include the actual client window
 	rect_t  geometry; ///< The original geometry the window specified when i3 mapped it. Used when switching a window to floating mode, for example
-	bool  urgent;
-	bool  focused;
-	std::optional<std::string> workspace;
+	bool  urgent{};
+	bool  focused{};
+	std::optional<bool>  sticky;
+	std::optional<bool>  visible;
+	std::optional<bool>  inhibit_idle;
+	std::optional<FullscreenMode>  fullscreen_mode;
+	std::optional<uint64_t>  pid;
+	std::optional<uint64_t>  window;
+	std::optional<std::string>  app_id;
+	std::optional<std::string>  representation;
+	std::optional<std::string>  workspace;
+	std::optional<std::string> shell;
+	std::optional<idle_inhibitors_t> idle_inhibitors;
+	std::optional<std::vector<std::string>>  marks;  // List of marks assigned to the node
+	std::optional<std::vector<uint64_t>>  focus; // array of child node IDs in the current focus order
 
 	window_properties_t  window_properties; /// X11 window properties
 
-	std::list< std::shared_ptr<container_t> >  nodes;
-	std::list< std::shared_ptr<container_t> >  floating_nodes;
-
-	std::map<std::string, std::string> map;
+	std::vector<std::shared_ptr<container_t>>  nodes;
+	std::vector<std::shared_ptr<container_t>>  floating_nodes;
 };
 
 

@@ -83,6 +83,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 #define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
 	if (o.isNull())
 		return nullptr;
+
 	auto  container{std::make_shared<container_t>()};
 	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o");
 
@@ -136,40 +137,92 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
 	}
 
-	for (auto& member : o.getMemberNames()) {
-		std::string value;
-		try {
-			value = o[member].asString();
-		} catch(const std::exception&) {
-			// Just collect what we can
-			continue;
-		}
-		
-		container->map[member] = value;
-	}
-
-	if (Json::Value value{o["name"]}; container->type == "workspace" && !value.isNull()) {
-		container->workspace = value.asString();
+	if (container->type == "workspace" && !o["name"].isNull()) {
+		container->workspace = o["name"].asString();
 	} else {
 		// Inherit workspace if any
 		container->workspace = workspace_name;
 	}
-	
 
-	Json::Value  nodes = o["nodes"];
-	if (!nodes.isNull()) {
-		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes");
-		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
-			container->nodes.push_back(parse_container_from_json(nodes[i], container->workspace));
-		}
+	if (!o["sticky"].isNull()) {
+		container->sticky = o["sticky"].asBool();
 	}
 
-	Json::Value  floating_nodes = o["floating_nodes"];
-	if (!floating_nodes.isNull()) {
+	if (!o["visible"].isNull()) {
+		container->visible = o["visible"].asBool();
+	}
+
+	if (!o["inhibit_idle"].isNull()) {
+		container->inhibit_idle = o["inhibit_idle"].asBool();
+	}
+
+	if (!o["fullscreen_mode"].isNull()) {
+		container->fullscreen_mode = static_cast<FullscreenMode>(o["fullscreen_mode"].asInt());
+	}
+
+	if (!o["pid"].isNull()) {
+		container->pid = o["pid"].asUInt64();
+	}
+
+	if (!o["window"].isNull()) {
+		container->window = o["window"].asUInt64();
+	}
+
+	if (!o["app_id"].isNull()) {
+		container->app_id = o["app_id"].asString();
+	}
+
+	if (!o["representation"].isNull()) {
+		container->representation = o["representation"].asString();
+	}
+
+	if (!o["shell"].isNull()) {
+		container->shell = o["shell"].asString();
+	}
+
+	const Json::Value& marks{o["marks"]};
+	if (!marks.isNull() && !marks.empty()) {
+		container->marks = std::vector<std::string>();
+		container->marks->reserve(marks.size());
+		std::transform(std::begin(marks), std::end(marks), std::back_inserter(container->marks.value()), [](const Json::Value& mark)
+		{
+			return mark.asString();
+		});
+	}
+
+	const Json::Value& focus_ids{o["focus"]};
+	if (!focus_ids.isNull() && !focus_ids.empty()) {
+		container->focus = std::vector<uint64_t>();
+		container->focus->reserve(focus_ids.size());
+		std::transform(std::begin(focus_ids), std::end(focus_ids), std::back_inserter(container->focus.value()), [](const Json::Value& id)
+		{
+			return id.asUInt64();
+		});
+	}
+
+	const Json::Value& idle_inhibitors{o["idle_inhibitors"]};
+	if (!idle_inhibitors.isNull() && !idle_inhibitors.empty()) {
+		container->idle_inhibitors = idle_inhibitors_t{idle_inhibitors["application"].asString(), idle_inhibitors["user"].asString()};
+	}
+
+	const Json::Value&  nodes{o["nodes"]};
+	if (!nodes.isNull() && nodes.size() > 0) {
+		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes");
+		container->nodes.reserve(nodes.size());
+		std::transform(std::begin(nodes), std::end(nodes), std::back_inserter(container->nodes), [workspace{container->workspace}](const Json::Value& node)
+		{
+			return parse_container_from_json(node, workspace);
+		});
+	}
+
+	const Json::Value&  floating_nodes{o["floating_nodes"]};
+	if (!floating_nodes.isNull() && !floating_nodes.empty()) {
 		IPC_JSON_ASSERT_TYPE_ARRAY(floating_nodes, "floating_nodes");
-		for (Json::ArrayIndex  i = 0; i < floating_nodes.size(); i++) {
-			container->floating_nodes.push_back(parse_container_from_json(floating_nodes[i], container->workspace));
-		}
+		container->floating_nodes.reserve(floating_nodes.size());
+		std::transform(std::begin(floating_nodes), std::end(floating_nodes), std::back_inserter(container->floating_nodes), [workspace{container->workspace}](const Json::Value& node)
+		{
+			return parse_container_from_json(node, workspace);
+		});
 	}
 
 	container->window_properties = parse_window_props_from_json(o["window_properties"]);
