@@ -126,6 +126,8 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		container->layout = ContainerLayout::DOCKAREA;
 	} else if (layout == "output") {
 		container->layout = ContainerLayout::OUTPUT;
+	} else if (layout == "none" ) {
+		container->layout = ContainerLayout::NONE;
 	} else {
 		container->layout_raw = border;
 		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")

@@ -135,6 +135,7 @@ enum class ContainerLayout : char {
 	TABBED = 't',
 	DOCKAREA = 'd',
 	OUTPUT = 'o',
+	NONE = 'N',
 };
 
 
