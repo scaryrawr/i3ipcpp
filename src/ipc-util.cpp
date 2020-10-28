@@ -9,6 +9,7 @@ extern "C" {
 }
 
 #include <cstring>
+#include <algorithm>
 #include <ios>
 
 #include <auss.hpp>
