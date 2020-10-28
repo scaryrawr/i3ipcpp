@@ -9,13 +9,28 @@ An implementation of i3 IPC in C++17.
 ## Requirements
 
 * cmake (>= 3.0)
-* C++11 compiler
+* C++17 compiler
 * sigc++ 2.0
 * jsoncpp
 
 ## Using
 
-Yet the only way of using is to add this repo as a submodule
+### Cmake FetchContent
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    i3ipc++
+    GIT_REPOSITORY https://github.com/drmgc/i3ipcpp
+)
+
+FetchContent_MakeAvailable(i3ipc++)
+
+add_executable(target ./main.cpp)
+target_link_libraries(target i3ipc++)
+```
+
+### As a submodule
 
 ```bash
 git submodule add https://github.com/drmgc/i3ipcpp.git ./i3ipc++/
@@ -52,7 +67,7 @@ See also examples in `examples/` directory.
 i3ipc::connection  conn;
 ```
 
-The connection will be established automaticly.
+The connection will be established automatically.
 
 ### Event handling
 
@@ -128,7 +143,7 @@ if (!conn.send_command("exit")) {
 Quoted strings can be passed like this:
 
 ```c++
-conn.send_command("[workspace=\" 1 \""] move workspace to output eDP-1");
+conn.send_command("[workspace=\" 1 \"] move workspace to output eDP-1");
 ```
 
 ## Version i3 support
