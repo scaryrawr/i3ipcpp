@@ -1,4 +1,6 @@
-build
+build/
 doc
 *.sublime-workspace
 *.log
+.vscode/
+.clangd/
