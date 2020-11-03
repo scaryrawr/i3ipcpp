@@ -17,8 +17,8 @@ pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
 set(I3IPCpp_INCLUDE_DIRS
 	${SIGCPP_INCLUDE_DIRS}
-	${i3ipc++_SOURCE_DIR}/3rd/auss/include
-	${i3ipc++_SOURCE_DIR}/include/
+	./3rd/auss/include
+	./include
 )
 
 set(I3IPCpp_LIBRARY_DIRS
@@ -45,7 +45,7 @@ target_include_directories(i3ipc++
 		${I3IPCpp_INCLUDE_DIRS}
 	PRIVATE
 		${JSONCPP_INCLUDE_DIRS}
-		${i3ipc++_SOURCE_DIR}/include/i3ipc++
+		./include/i3ipc++
 )
 
 link_directories(i3ipc++
@@ -87,14 +87,14 @@ if(HAS_PARENT_DIRECTORY)
 endif()
 
 if(I3IPCpp_BUILD_EXAMPLES)
-	add_subdirectory(${i3ipc++_SOURCE_DIR}/examples)
+	add_subdirectory(./examples)
 endif()
 
 if(I3IPCpp_WITH_TESTS)
 	find_package(CxxTest)
 	if(CXXTEST_FOUND)
 		add_definitions(
-			-DTEST_SRC_ROOT="${i3ipc++_SOURCE_DIR}/test"
+			-DTEST_SRC_ROOT="./test"
 		)
 
 		enable_testing()
@@ -109,7 +109,7 @@ if(I3IPCpp_WITH_TESTS)
 				${I3IPCpp_INCLUDE_DIRS}
 			PRIVATE
 				${JSONCPP_INCLUDE_DIRS}
-				${i3ipc++_SOURCE_DIR}/include/i3ipc++
+				./include/i3ipc++
 		)
 
 		link_directories(i3ipcpp_check
